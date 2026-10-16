@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL System
 
-package «rustic-audio-lean»
+package «rustic_audio_lean»
 
 @[default_target]
 lean_lib RusticAudio

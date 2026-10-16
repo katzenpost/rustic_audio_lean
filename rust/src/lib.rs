@@ -7,7 +7,7 @@
 #![allow(clippy::missing_safety_doc)]
 
 use lean_sys::*;
-use rustic_audio_tool::VoiceNoteEngine;
+use rustic_audio::VoiceNoteEngine;
 use std::sync::Mutex;
 
 /// Changes whenever a declaration in `RusticAudio.lean` must change with this file.

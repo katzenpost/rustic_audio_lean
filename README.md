@@ -1,8 +1,8 @@
-# rustic-audio-lean
+# rustic_audio_lean
 
 Voice notes for Lean 4 programs: recording a clip from the default microphone to an Ogg Opus
 file (48 kHz, mono, 20 ms frames) and playing one, from the Rust crate
-[Rustic Audio](https://github.com/katzenpost/Rustic_Audio_PyO3). The Rust side uses
+[Rustic Audio](https://github.com/katzenpost/rustic_audio). The Rust side uses
 [lean-sys](https://github.com/katzenpost/lean-sys) for Lean's object model.
 
 ## Use
@@ -11,8 +11,8 @@ In your `lakefile`:
 
 ```toml
 [[require]]
-name = "rustic-audio-lean"
-git = "https://github.com/katzenpost/rustic-audio-lean"
+name = "rustic_audio_lean"
+git = "https://github.com/katzenpost/rustic_audio_lean"
 rev = "<commit>"
 
 [[lean_exe]]
