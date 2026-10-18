@@ -1,7 +1,11 @@
 import Lake
 open Lake DSL System
 
-package «rustic_audio_lean»
+package «rustic_audio_lean» where
+  version := v!"0.1.0"
+  description := "Voice notes for Lean 4, from rustic_audio"
+  keywords := #["audio", "voice", "ffi", "rust"]
+  license := "AGPL-3.0-only"
 
 @[default_target]
 lean_lib RusticAudio
