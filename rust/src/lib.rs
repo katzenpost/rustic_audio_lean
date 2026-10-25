@@ -14,7 +14,7 @@ use std::sync::Mutex;
 pub const ABI_VERSION: u32 = 1;
 
 unsafe fn string_of(s: b_lean_obj_arg) -> String {
-    let bytes = std::slice::from_raw_parts(lean_string_cstr(s) as *const u8, lean_string_size(s) - 1);
+    let bytes = std::slice::from_raw_parts(lean_string_cstr(s), lean_string_size(s) - 1);
     String::from_utf8_lossy(bytes).into_owned()
 }
 
@@ -54,7 +54,9 @@ unsafe fn with_engine<T>(
     f: impl FnOnce(&mut VoiceNoteEngine) -> Result<T, String>,
 ) -> Result<T, String> {
     let m = &*(lean_get_external_data(e) as *const Mutex<VoiceNoteEngine>);
-    let mut g = m.lock().map_err(|_| "audio engine mutex poisoned".to_string())?;
+    let mut g = m
+        .lock()
+        .map_err(|_| "audio engine mutex poisoned".to_string())?;
     f(&mut g)
 }
 
@@ -67,7 +69,10 @@ pub extern "C" fn rustic_audio_abi_version(_: lean_obj_arg) -> u32 {
 #[no_mangle]
 pub unsafe extern "C" fn ra_engine_new(dir: b_lean_obj_arg) -> lean_obj_res {
     match VoiceNoteEngine::new(string_of(dir)) {
-        Ok(e) => io_ok(lean_alloc_external(engine_class(), Box::into_raw(Box::new(Mutex::new(e))) as *mut _)),
+        Ok(e) => io_ok(lean_alloc_external(
+            engine_class(),
+            Box::into_raw(Box::new(Mutex::new(e))) as *mut _,
+        )),
         Err(e) => io_err(&e),
     }
 }
@@ -75,7 +80,11 @@ pub unsafe extern "C" fn ra_engine_new(dir: b_lean_obj_arg) -> lean_obj_res {
 /// Starts recording; the path the clip will have.
 #[no_mangle]
 pub unsafe extern "C" fn ra_start_capture(e: b_lean_obj_arg, stem: b_lean_obj_arg) -> lean_obj_res {
-    let stem = if lean_is_scalar(stem) { None } else { Some(string_of(lean_ctor_get(stem, 0))) };
+    let stem = if lean_is_scalar(stem) {
+        None
+    } else {
+        Some(string_of(lean_ctor_get(stem, 0)))
+    };
     match with_engine(e, |e| e.start_capture(stem.as_deref())) {
         Ok(p) => io_ok(lean_string(&p.to_string_lossy())),
         Err(e) => io_err(&e),
@@ -89,7 +98,11 @@ pub unsafe extern "C" fn ra_stop_capture(e: b_lean_obj_arg) -> lean_obj_res {
         Ok(c) => {
             let o = lean_alloc_ctor(0, 3, 0);
             lean_ctor_set(o, 0, lean_string(&c.path().to_string_lossy()));
-            lean_ctor_set(o, 1, lean_uint64_to_nat((c.duration_seconds() * 1000.0).round() as u64));
+            lean_ctor_set(
+                o,
+                1,
+                lean_uint64_to_nat((c.duration_seconds() * 1000.0).round() as u64),
+            );
             lean_ctor_set(o, 2, lean_uint64_to_nat(c.file_size_bytes()));
             io_ok(o)
         }

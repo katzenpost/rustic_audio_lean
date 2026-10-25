@@ -55,6 +55,11 @@ them without hardware:
     printf 'pcm.!default { type null }\nctl.!default { type hw card 0 }\n' > null.conf
     ALSA_CONFIG_PATH=null.conf lake exe audio-test
 
+## Releases
+
+A release is a tag `vX.Y.Z` naming the `version` in `lakefile.lean`; pushing the tag runs the
+tests and makes the GitHub release. Reservoir lists the package's versions from these tags.
+
 ## License
 
 AGPL-3.0-only
