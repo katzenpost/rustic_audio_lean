@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+
+# A tag vX.Y.Z is a release when it names the version in the lakefile and the tests pass at it.
+# Reservoir reads the versions of a package from such tags.
+
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: the tag is the lakefile's version
+        run: |
+          ours=v$(sed -n 's/^ *version := v!"\(.*\)"/\1/p' lakefile.lean)
+          echo "tag $GITHUB_REF_NAME, lakefile $ours"
+          [ "$GITHUB_REF_NAME" = "$ours" ]
+  test:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
