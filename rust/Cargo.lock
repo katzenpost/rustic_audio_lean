@@ -253,9 +253,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "lean-sys"
-version = "0.0.10"
-source = "git+https://github.com/katzenpost/lean-sys?rev=ac11ff152cc82bccd0ef18f45384ac5acb091260#ac11ff152cc82bccd0ef18f45384ac5acb091260"
+name = "katzenpost-lean-sys"
+version = "0.1.0"
+source = "git+https://github.com/katzenpost/lean-sys?rev=7b998184a82d6a6ddcc7626abf5eaac2e5345244#7b998184a82d6a6ddcc7626abf5eaac2e5345244"
 dependencies = [
  "libc",
  "memoffset",
@@ -504,7 +504,8 @@ checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 [[package]]
 name = "opus-rs"
 version = "0.1.22"
-source = "git+https://github.com/katzenpost/rustic_audio?rev=6f7969d03a201406beb1f5aa6cfbf70567abc435#6f7969d03a201406beb1f5aa6cfbf70567abc435"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28911d75055df30f4e6203424619fd81d6435c5d63a9d9942968848db545f3b9"
 
 [[package]]
 name = "parking_lot"
@@ -612,7 +613,7 @@ dependencies = [
 [[package]]
 name = "rustic_audio"
 version = "0.0.2"
-source = "git+https://github.com/katzenpost/rustic_audio?rev=6f7969d03a201406beb1f5aa6cfbf70567abc435#6f7969d03a201406beb1f5aa6cfbf70567abc435"
+source = "git+https://github.com/katzenpost/rustic_audio?rev=533a72647143ecbbf22038dcab82ad3cc2ae537b#533a72647143ecbbf22038dcab82ad3cc2ae537b"
 dependencies = [
  "cpal",
  "hound",
@@ -624,9 +625,9 @@ dependencies = [
 
 [[package]]
 name = "rustic_audio_lean"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
- "lean-sys",
+ "katzenpost-lean-sys",
  "rustic_audio",
 ]
 

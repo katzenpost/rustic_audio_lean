@@ -21,6 +21,8 @@ def fails (act : IO α) : IO Bool := do
 
 def main : IO UInt32 := do
   let dir := (← IO.currentDir) / ".lake" / "audio-test"
+  -- Clips an earlier run left would be counted with this run's.
+  if ← dir.pathExists then IO.FS.removeDirAll dir
   let ((), failed) ← (do
     check "the library is the one declared" abiMatches
     let e ← Engine.new dir.toString
