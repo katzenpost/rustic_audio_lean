@@ -27,10 +27,10 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: lean-sys is built for our toolchain
         run: |
-          rev=$(sed -n 's/^lean-sys = .*rev = "\([0-9a-f]*\)".*/\1/p' rust/Cargo.toml)
-          theirs=$(curl -fsSL "https://raw.githubusercontent.com/katzenpost/lean-sys/$rev/lean-toolchain")
-          echo "lean-sys $rev: $theirs, ours: $(cat lean-toolchain)"
-          [ "$theirs" = "$(cat lean-toolchain)" ]
+          dir=$(cd rust && cargo metadata --locked --format-version 1 |
+            jq -r '.packages[] | select(.name == "katzenpost-lean-sys") | .manifest_path' | xargs dirname)
+          echo "katzenpost-lean-sys: $(cat "$dir/lean-toolchain"), ours: $(cat lean-toolchain)"
+          [ "$(cat "$dir/lean-toolchain")" = "$(cat lean-toolchain)" ]
       - run: cargo fmt --check
         working-directory: rust
       - run: cargo clippy --all-targets -- -D warnings
