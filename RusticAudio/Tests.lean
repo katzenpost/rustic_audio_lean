@@ -46,6 +46,29 @@ def main : IO UInt32 := do
       else
         e.stopPlayback
         check "and stops" !(← e.isPlaying)
+    check "nothing is listening" !(← e.isListening)
+    check "reading a frame when not listening fails" (← fails e.readFrame)
+    check "listening at 0 Hz fails" (← fails (e.startListen 0 320))
+    check "playing samples at 0 Hz fails" (← fails (e.playSamples 0 (FloatArray.mk #[0])))
+    -- 0.2 s of 1 kHz at 16 kHz, a quarter of full scale.
+    let tone := FloatArray.mk <| (Array.range 3200).map fun (i : Nat) =>
+      0.25 * Float.sin (2 * 3.141592653589793 * 1000 * i.toFloat / 16000)
+    match ← (e.playSamples 16000 tone).toBaseIO with
+    | .error err => IO.println s!"skip playing samples: {err}"
+    | .ok () => check "samples play to their end" true
+    match ← (e.startListen 16000 320).toBaseIO with
+    | .error err => IO.println s!"skip listening: {err}"
+    | .ok () =>
+      check "and is listening" (← e.isListening)
+      check "listening twice at once fails" (← fails (e.startListen 16000 320))
+      let mut frame : Option FloatArray := none
+      for _ in [0:50] do
+        frame ← e.readFrame
+        if frame.isSome then break
+        IO.sleep 20
+      check "a frame is heard, of the size asked for" (frame.map FloatArray.size == some 320)
+      e.stopListen
+      check "and stops listening" !(← e.isListening)
     match ← (e.startCapture (some "test")).toBaseIO with
     | .error err => IO.println s!"skip recording a clip: {err}"
     | .ok path =>

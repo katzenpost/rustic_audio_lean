@@ -11,7 +11,7 @@ are implemented in `rust/src/lib.rs`. -/
 
 namespace RusticAudio
 
-def abiVersion : UInt32 := 1
+def abiVersion : UInt32 := 2
 
 @[extern "rustic_audio_abi_version"] opaque rustAbiVersion : Unit → UInt32
 
@@ -60,5 +60,25 @@ opaque Engine.startCapture (e : @& Engine) (stem : @& Option String) : IO String
 /-- Why the last playback failed, once. -/
 @[extern "ra_take_playback_error"]
 opaque Engine.takePlaybackError (e : @& Engine) : IO (Option String)
+
+/-! ## Raw samples -/
+
+/-- Plays mono samples in -1..1 at `rate` Hz on the default output, resampled to the device's
+rate. Blocks until they have played. -/
+@[extern "ra_play_samples"]
+opaque Engine.playSamples (e : @& Engine) (rate : UInt32) (samples : @& FloatArray) : IO Unit
+
+/-- Starts listening to the default microphone, heard mono at `rate` Hz in frames of `frame`
+samples. Up to two seconds wait to be read; what comes after is dropped until they are. -/
+@[extern "ra_start_listen"]
+opaque Engine.startListen (e : @& Engine) (rate frame : UInt32) : IO Unit
+
+/-- The next frame heard, if one is ready. Fails when not listening. -/
+@[extern "ra_read_frame"] opaque Engine.readFrame (e : @& Engine) : IO (Option FloatArray)
+
+/-- Stops listening, dropping what was heard and not read. -/
+@[extern "ra_stop_listen"] opaque Engine.stopListen (e : @& Engine) : IO Unit
+
+@[extern "ra_is_listening"] opaque Engine.isListening (e : @& Engine) : IO Bool
 
 end RusticAudio

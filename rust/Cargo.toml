@@ -11,6 +11,7 @@ crate-type = ["staticlib"]
 
 [dependencies]
 lean-sys = { git = "https://github.com/katzenpost/lean-sys", rev = "7b998184a82d6a6ddcc7626abf5eaac2e5345244", package = "katzenpost-lean-sys", default-features = false, features = ["mimalloc"] }
+cpal = "0.17.3"
 rustic_audio = { git = "https://github.com/katzenpost/rustic_audio", rev = "533a72647143ecbbf22038dcab82ad3cc2ae537b" }
 
 [profile.release]
