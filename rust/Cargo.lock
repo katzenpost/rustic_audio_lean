@@ -627,6 +627,7 @@ dependencies = [
 name = "rustic_audio_lean"
 version = "0.2.0"
 dependencies = [
+ "cpal",
  "katzenpost-lean-sys",
  "rustic_audio",
 ]
