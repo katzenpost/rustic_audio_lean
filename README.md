@@ -1,13 +1,18 @@
 # rustic_audio_lean
 
-Voice notes for Lean 4 programs: recording a clip from the default microphone to an Ogg Opus
-file (48 kHz, mono, 20 ms frames) and playing one, from the Rust crate
-[Rustic Audio](https://github.com/katzenpost/rustic_audio). The Rust side uses
-[lean-sys](https://github.com/katzenpost/lean-sys) for Lean's object model.
+Voice notes for Lean 4 programs: record a clip from the default microphone to an Ogg Opus file
+(48 kHz, mono, 20 ms frames), play one back, and play or hear raw samples. It wraps the Rust
+crate [Rustic Audio](https://github.com/katzenpost/rustic_audio) over
+[lean-sys](https://github.com/katzenpost/lean-sys). It is for Lean programmers who need sound
+in an executable; a Rust program should use Rustic Audio directly.
+
+It uses the default input and output only, records or plays one clip at a time, and runs on
+Linux through ALSA. It does not choose devices or write formats other than Ogg Opus.
 
 ## Use
 
-In your `lakefile`:
+Install `cargo`, ALSA's headers and `pkg-config` (`apt install libasound2-dev pkg-config`).
+In your `lakefile.toml`:
 
 ```toml
 [[require]]
@@ -19,6 +24,8 @@ rev = "<commit>"
 name = "app"
 moreLinkArgs = ["-Wl,--allow-shlib-undefined", "/usr/lib/x86_64-linux-gnu/libasound.so.2"]
 ```
+
+and in `app.lean`:
 
 ```lean
 import RusticAudio
@@ -34,47 +41,32 @@ def main : IO Unit := do
   while ← e.isPlaying do IO.sleep 100
 ```
 
-### Raw samples
+Then `lake build app && .lake/build/bin/app`. Raw samples are in
+[docs/raw-samples.md](docs/raw-samples.md); why ALSA is linked by path, sound devices and
+releases are in [docs/building.md](docs/building.md).
 
-For codecs such as ggwave, an engine also plays and hears raw samples: mono, in -1..1, at a
-rate of your choosing, resampled to and from whatever rate the device runs at.
+## Map
 
-```lean
-  e.playSamples 48000 samples          -- a FloatArray; returns once it has played
-  e.startListen 48000 1024             -- the microphone, in frames of 1024 samples
-  if let some frame ← e.readFrame then -- none until a whole frame is ready
-    IO.println s!"{frame.size} samples"
-  e.stopListen
-```
+- [`RusticAudio.lean`](RusticAudio.lean): the Lean API, `Engine` and `Clip`.
+- [`RusticAudio/Tests.lean`](RusticAudio/Tests.lean): the `audio-test` executable.
+- [`rust/src/lib.rs`](rust/src/lib.rs): the exported functions, over Rustic Audio.
+- [`rust/src/stream.rs`](rust/src/stream.rs): raw samples and the resampler.
+- [`tests/tone.opus`](tests/tone.opus): a clip the tests play.
 
-Up to two seconds wait to be read; a reader that falls further behind loses what comes after.
+## Status
 
-Building needs `cargo` on the `PATH`, and ALSA's headers and `pkg-config`
-(`apt install libasound2-dev pkg-config`). Lake builds the crate in `rust/` and links it into
-your executables.
-
-Executables link ALSA's shared library by its path, as above. Lean links with its own, older C
-library, so the symbols ALSA takes from the system's C library are left to be found when the
-program starts.
-
-Sound goes through ALSA's default devices; PulseAudio and PipeWire are reached through their
-ALSA plugins. Reading `/dev/snd` directly needs membership of the `audio` group.
+Version 0.2.0, on Lean 4.35.0 and Rust 1.99.0. `abiMatches` checks that the linked Rust
+library is the one the Lean declarations are for (ABI version 2). CI also builds the crate for
+Android (arm64).
 
 ## Tests
 
+    (cd rust && cargo test)
     lake exe audio-test
 
-Without a sound device the tests that play and record are skipped. ALSA's null device runs
-them without hardware:
-
-    printf 'pcm.!default { type null }\nctl.!default { type hw card 0 }\n' > null.conf
-    ALSA_CONFIG_PATH=null.conf lake exe audio-test
-
-## Releases
-
-A release is a tag `vX.Y.Z` naming the `version` in `lakefile.lean`; pushing the tag runs the
-tests and makes the GitHub release. Reservoir lists the package's versions from these tags.
+Without a sound device the tests that play and record are skipped; ALSA's null device runs them
+without hardware, as described in [docs/building.md](docs/building.md).
 
 ## License
 
-AGPL-3.0-only
+[AGPL-3.0-only](LICENSE)
